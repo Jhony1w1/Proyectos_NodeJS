@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router'
+import { Toaster } from 'sonner'
 
 export default function AuthLayout() {
   return (
@@ -8,6 +9,7 @@ export default function AuthLayout() {
                 <img src="/logo.svg" alt="Devtree" />
 
                 <div className='py-10'>
+                    <Toaster position="top-right" richColors/>
                     <Outlet /> {/* This is where the child routes will be rendered */}
                 </div>
 

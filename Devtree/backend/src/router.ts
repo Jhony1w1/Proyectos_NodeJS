@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { body } from 'express-validator'
-import { createAccount, login } from './handlers';
+import { createAccount, getUser, login, updateProfile } from './handlers';
 import { handleInputErrors } from './middleware/validation';
+import { authenticated } from './middleware/auth';
 
 const router = Router();
 
@@ -28,5 +29,18 @@ router.post('/auth/login',
         .withMessage('Este campo es obligatorio'),
     handleInputErrors, // Middleware para manejar errores de validación
     login);
+
+router.get('/user', authenticated, getUser)
+
+router.patch('/user',
+    body(['handle', 'description'])
+        .trim()
+        .notEmpty()
+        .withMessage('Este campo es obligatorio'),
+    handleInputErrors,
+    authenticated, 
+    updateProfile
+)
+
 
 export default router; // Exportamos el router de express
