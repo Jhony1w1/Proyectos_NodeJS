@@ -2,13 +2,14 @@ import { useForm } from "react-hook-form";
 import ErrorMessage from "../components/ErrorMessage";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { ProfileForm, User } from "../types";
-import { updateProfile } from "../api/DevTreeAPI";
+import { updateProfile, uploadImage } from "../api/DevTreeAPI";
+import { toast } from "sonner";
+import { ChangeEvent } from "react";
 
 const ProfilePage = () => {
-
   // Obtener info de datos cacheados
-  const queryCliente = useQueryClient()
-  const data = queryCliente.getQueryData<User>(['user'])!
+  const queryCliente = useQueryClient();
+  const data = queryCliente.getQueryData<User>(["user"])!;
 
   const {
     register,
@@ -21,22 +22,45 @@ const ProfilePage = () => {
     },
   });
 
-  console.log(data);
-  
-
-  const updateMutationProfile = useMutation({
+  const updateProfileMutation = useMutation({
     mutationFn: updateProfile,
     onError: (err) => {
-      console.log('Hubo un error', err);
-      
+      // console.log('Hubo un error', err);
+      toast.error(err.message);
     },
     onSuccess: (res) => {
-      console.log('Todo bien', res);
+      toast.success(res?.data);
+      // console.log('Todo bien', res);
+      queryCliente.invalidateQueries({ queryKey: ["user"] }); // eliminar datos cacheados
+    },
+  });
+
+  const uploadImageMutation = useMutation({
+    mutationFn: uploadImage,
+    onError: (err) => {
+      toast.error(err.message);
+    },
+    onSuccess: (data) => {
+      toast.success("imagen subida correctamente");
+      queryCliente.setQueryData(["user"], (prevData: User) => {
+        return {
+          ...prevData,
+          image: data.image
+        }
+        
+      }) // eliminar datos cacheados
+    },
+  });
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      //console.log(e.target.files[0]);
+      uploadImageMutation.mutate(e.target.files[0]);
     }
-  })
+  };
 
   const onSubmit = (formData: ProfileForm) => {
-    updateMutationProfile.mutate(formData)
+    updateProfileMutation.mutate(formData);
   };
 
   return (
@@ -71,7 +95,9 @@ const ProfilePage = () => {
           })}
         />
 
-        {errors.description && <ErrorMessage>{errors.description.message}</ErrorMessage>}
+        {errors.description && (
+          <ErrorMessage>{errors.description.message}</ErrorMessage>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-2">
@@ -82,7 +108,7 @@ const ProfilePage = () => {
           name="handle"
           className="border-none bg-slate-100 rounded-lg p-2"
           accept="image/*"
-          onChange={() => {}}
+          onChange={handleChange}
         />
       </div>
 

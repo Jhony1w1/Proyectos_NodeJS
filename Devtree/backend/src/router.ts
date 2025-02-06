@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { body } from 'express-validator'
-import { createAccount, getUser, login, updateProfile } from './handlers';
+import { createAccount, getUser, login, updateProfile, uploadImage } from './handlers';
 import { handleInputErrors } from './middleware/validation';
 import { authenticated } from './middleware/auth';
 
@@ -38,9 +38,13 @@ router.patch('/user',
         .notEmpty()
         .withMessage('Este campo es obligatorio'),
     handleInputErrors,
-    authenticated, 
+    authenticated,
     updateProfile
 )
 
+router.post('/user/image',
+    authenticated,
+    uploadImage
+)
 
 export default router; // Exportamos el router de express
