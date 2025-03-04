@@ -60,7 +60,10 @@ const ProfilePage = () => {
   };
 
   const onSubmit = (formData: ProfileForm) => {
-    updateProfileMutation.mutate(formData);
+    const user: User = queryCliente.getQueryData(['user'])!
+    user.description = formData.description
+    user.handle = formData.handle
+    updateProfileMutation.mutate(user);
   };
 
   return (
