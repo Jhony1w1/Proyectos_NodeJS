@@ -66,12 +66,27 @@ export default function LinkTreePage() {
     );
 
     if (selectedSocialNetwork?.enabled) {
-      // se le agrega un id unico
-      const newItem = {
-        ...selectedSocialNetwork,
-        id: links.length + 1,
-      };
-      updatedItems = [...links, newItem];
+      const id = links.filter((link) => link.id > 0).length + 1;
+      if (links.some((link) => link.name === socialNetwork)) {
+        updatedItems = links.map((link) => {
+          if (link.name === socialNetwork) {
+            return {
+              ...link,
+              enabled: true,
+              id,
+            };
+          } else {
+            return link;
+          }
+        });
+      } else {
+        // se le agrega un id unico
+        const newItem = {
+          ...selectedSocialNetwork,
+          id
+        };
+        updatedItems = [...links, newItem];
+      }
     } else {
       const indexToUpdate = links.findIndex(
         (link) => link.name === socialNetwork
@@ -83,7 +98,7 @@ export default function LinkTreePage() {
             id: 0,
             enabled: false,
           };
-        } else if (link.id > indexToUpdate) {
+        } else if (link.id > indexToUpdate && (indexToUpdate !== 0 && link.id === 1)) {
           return {
             ...link,
             id: link.id - 1,
@@ -115,7 +130,7 @@ export default function LinkTreePage() {
         ))}
         <button
           className="bg-cyan-400 p-2 text-lg w-full uppercase text-slate-600 rounded font-bold"
-          onClick={() => mutate(user)}
+          onClick={() => mutate(queryClient.getQueryData(["user"])!)}
         >
           Guardar Cambios
         </button>
